@@ -42,16 +42,6 @@ def remove_diacritics(text: str) -> str:
         text = text.replace(d, "")
     return text
 
-
-# ---------------------------------------------------------
-# Alternative faster method using regex 
-# DIACRITICS_PATTERN = re.compile(r"[\u064b-\u0652\u0670]")
-# def remove_diacritics(text: str) -> str:
-#     """Remove diacritics using one fast regex."""
-#     return DIACRITICS_PATTERN.sub("", text)
-
-
-
 # ---------------------------------------------------------
 # 3. Normalize Arabic characters
 # ---------------------------------------------------------
@@ -68,49 +58,38 @@ def normalize_arabic(text: str) -> str:
     text = text.replace("ـ", "")  # remove tatweel
     return text
 
-
 # ---------------------------------------------------------
 # 4. Clean text line
 # ---------------------------------------------------------
+ARABIC_LETTERS = "ءاأإآبتثجحخدذرزسشصضطظعغفقكلمنهوي"
+
 def clean_sentence(sentence: str) -> str:
-    """Normalize + remove unwanted characters."""
+    """
+    Cleans Arabic sentence while preserving diacritics defined in ARABIC_DIACRITICS.
+    Steps:
+        1) Normalize Arabic letters (Reduce variations)
+        2) Remove English digits & characters
+        3) Remove punctuation / symbols
+        4) Keep ONLY Arabic letters + diacritics + spaces
+        5) Compress multiple spaces
+    """
+
+    # (1) normalize 
     sentence = normalize_arabic(sentence)
+    # (2) Remove English & numbers
+    sentence = re.sub(r"[A-Za-z0-9]+", " ", sentence)
 
-    # Remove English letters and numbers
-    sentence = re.sub(r"[A-Za-z0-9]", " ", sentence)
+    # (3) Remove punctuation, brackets, symbols
+    sentence = re.sub(r"[«»()\[\]{}<>؛:;/\\\-–—_.,!?+*=]", " ", sentence)
 
-    # Keep only Arabic letters, diacritics, and spaces
-    allowed = (
-        r"[^ءاأإآبتثجحخدذرزسشصضطظعغفقكلمنهوي"
-        + "".join(ARABIC_DIACRITICS)
-        + r"\s]"
-    )
-    sentence = re.sub(allowed, " ", sentence)
+    # (4) Allow only Arabic + diacritics + whitespace
+    allowed_pattern = rf"[^{ARABIC_LETTERS}{''.join(ARABIC_DIACRITICS)}\s]"
+    sentence = re.sub(allowed_pattern, " ", sentence)
 
-    # Collapse multiple spaces
+    # (5) Remove duplicate spaces
     sentence = re.sub(r"\s+", " ", sentence).strip()
+
     return sentence
-
-# Alternative method with predefined ranges -- after opening training set
-# ARABIC = r"ءاأإآبتثجحخدذرزسشصضطظعغفقكلمنهوي"
-# DIACRITICS = r"\u064b-\u0652\u0670"  
-
-# def clean_sentence(sentence):
-
-#     # 1) Remove numbers & English
-#     sentence = re.sub(r"[A-Za-z0-9]+", " ", sentence)
-
-#     # 2) Remove brackets, slashes, page references, punctuation
-#     sentence = re.sub(r"[«»\(\)\[\]{}<>:;/\\\-–—_.,!?+*=]", " ", sentence)
-
-#     # 3) Allow ONLY Arabic + harakat + spaces
-#     sentence = re.sub(rf"[^{ARABIC}{DIACRITICS}\s]", " ", sentence)
-
-#     # 4) Normalize spaces
-#     sentence = re.sub(r"\s+", " ", sentence).strip()
-
-#     return sentence
-
 
 # ---------------------------------------------------------
 # 5. Split word into (base, diacritics)
