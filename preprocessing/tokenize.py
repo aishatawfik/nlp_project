@@ -21,88 +21,13 @@ from clean import (
 # =========================================================
 # (1) Character Vocabulary
 # =========================================================
-# =========================================================
-# (1) Build Character Vocabulary
-# ---------------------------------------------------------
 # This function scans ALL sentences in the dataset and collects
 # every unique Arabic character that appears (including space).
-#
-# WHY?
-# ----
 # Neural networks cannot work directly with letters → they need
 # numbers. So we create two mappings:
-#
 #   char2id : maps each character → a numeric index
 #   id2char : maps numeric index → back to the character
-#
-# Example:
-# --------
-# sentences = ["ذهب محمد", "قال الرجل"]
-#
-# collected characters will be:
-#   {' ', 'ذ', 'ه', 'ب', 'م', 'ح', 'م', 'د', 'ق', 'ا', 'ل', 'ر', 'ج', 'ل'}
-#
-# After sorting and indexing:
-#   char2id might become:
-#       {
-#         ' ' : 0,
-#         'ا' : 1,
-#         'ب' : 2,
-#         'ح' : 3,
-#         'ذ' : 4,
-#         'د' : 5,
-#         'ر' : 6,
-#         'ج' : 7,
-#         'ل' : 8,
-#         'م' : 9,
-#         'ه' : 10
-#       }
-#
-# Later, when training:
-#   "ذهب" → [4,10,2]   # numerical form used by embedding layer
-#
 # This vocabulary becomes the foundation of the entire model.
-# =========================================================
-
-# =========================================================
-# build_char_vocab(sentences)
-# ---------------------------------------------------------
-# INPUT  : list of sentences (already cleaned)
-# OUTPUT : 
-#   1) char2id → dictionary mapping each character to integer ID
-#   2) id2char → reverse mapping from ID to character
-#
-# HOW IT WORKS:
-# -------------
-# 1. We start with a `set` containing just space " " 
-#    because spacing is important in diacritization.
-#
-# 2. We loop through all sentences and collect EVERY character.
-#    Example:
-#        sentences = ["ثُمَّ ذَهَبَ", "قال الرجل"]
-#    collected characters might be:
-#        {" ", "ث", "م", "ذ", "ه", "ب", "ق", "ا", "ل", "ر", "ج"}
-#
-# 3. We then SORT the characters — sorting keeps vocab ordering fixed
-#    so results are reproducible across runs.
-#
-# 4. We assign a unique numerical ID for each character:
-#        char2id = { ' ' : 0, 'ا' : 1, 'ب' : 2, 'ت' : 3, ... }
-#
-# 5. We finally build reverse mapping:
-#        id2char = { 0:' ', 1:'ا', 2:'ب', ... }
-#
-# WHY IT IS IMPORTANT:
-# --------------------
-# This vocabulary is what the neural network actually receives.
-# Characters must become numbers for Embedding → LSTM → CRF/Transformer.
-#
-# Example Encoding:
-#       word = "ذهب"
-#       → ['ذ','ه','ب']
-#       → [4, 10, 2]    # after mapping with char2id
-#
-# Without this step the model CANNOT train or infer.
 # =========================================================
 def build_char_vocab(sentences):
     """
