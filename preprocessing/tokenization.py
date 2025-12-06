@@ -11,7 +11,7 @@ diacritization model. This module contains:
 Small examples are included in docstrings for clarity.
 """
 
-from clean import (
+from preprocessing.clean import (
     clean_sentence,
     remove_diacritics,
     split_sentence_into_labeled_chars

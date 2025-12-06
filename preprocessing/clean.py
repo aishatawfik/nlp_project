@@ -30,6 +30,7 @@ ARABIC_DIACRITICS = [
     "\u0651\u064b",  # Shadda + Tanween Fath (ًّ)
     "\u0651\u064c",  # Shadda + Tanween Damm (ٌّ)
     "\u0651\u064d",  # Shadda + Tanween Kasr (ٍّ)
+    "\u0651\u0652",  # Shadda + Sukun (ّْ)
 ]
 
 
@@ -149,10 +150,3 @@ def split_sentence_into_labeled_chars(sentence: str):
         labeled.pop()  # remove the last extra space
 
     return labeled
-
-
-# ---------------------------------------------------------
-# 7. Full preprocess wrapper
-# ---------------------------------------------------------
-def preprocess(sentence: str) -> str:
-    return clean_sentence(sentence)
