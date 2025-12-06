@@ -44,6 +44,15 @@ def remove_diacritics(text: str) -> str:
 
 
 # ---------------------------------------------------------
+# Alternative faster method using regex 
+# DIACRITICS_PATTERN = re.compile(r"[\u064b-\u0652\u0670]")
+# def remove_diacritics(text: str) -> str:
+#     """Remove diacritics using one fast regex."""
+#     return DIACRITICS_PATTERN.sub("", text)
+
+
+
+# ---------------------------------------------------------
 # 3. Normalize Arabic characters
 # ---------------------------------------------------------
 def normalize_arabic(text: str) -> str:
@@ -53,6 +62,9 @@ def normalize_arabic(text: str) -> str:
     text = re.sub("ؤ", "و", text)
     text = re.sub("ئ", "ي", text)
     text = re.sub("ة", "ه", text)
+    # Make ta-marbuta → ه optional — essential for accuracy:
+    # if convert_ta_marbuta:
+    #     text = re.sub("ة", "ه", text)
     text = text.replace("ـ", "")  # remove tatweel
     return text
 
@@ -78,6 +90,26 @@ def clean_sentence(sentence: str) -> str:
     # Collapse multiple spaces
     sentence = re.sub(r"\s+", " ", sentence).strip()
     return sentence
+
+# Alternative method with predefined ranges -- after opening training set
+# ARABIC = r"ءاأإآبتثجحخدذرزسشصضطظعغفقكلمنهوي"
+# DIACRITICS = r"\u064b-\u0652\u0670"  
+
+# def clean_sentence(sentence):
+
+#     # 1) Remove numbers & English
+#     sentence = re.sub(r"[A-Za-z0-9]+", " ", sentence)
+
+#     # 2) Remove brackets, slashes, page references, punctuation
+#     sentence = re.sub(r"[«»\(\)\[\]{}<>:;/\\\-–—_.,!?+*=]", " ", sentence)
+
+#     # 3) Allow ONLY Arabic + harakat + spaces
+#     sentence = re.sub(rf"[^{ARABIC}{DIACRITICS}\s]", " ", sentence)
+
+#     # 4) Normalize spaces
+#     sentence = re.sub(r"\s+", " ", sentence).strip()
+
+#     return sentence
 
 
 # ---------------------------------------------------------
@@ -107,8 +139,8 @@ def split_word_into_labeled_chars(word: str):
         if base is not None:
             result.append((base, diacritics))
 
-        base = ch
-        diacritics = ""
+        base = ch # store the new letter
+        diacritics = "" # reset diacritics (we will collect new ones)
 
     # Append last letter
     if base is not None:
